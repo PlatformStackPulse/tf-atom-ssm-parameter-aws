@@ -1,30 +1,28 @@
-# Terraform Module Template
+# tf-atom-ssm-parameter-aws
 
-<!-- Badges: Update REPO_OWNER/REPO_NAME after creating from template -->
-[![CI](https://github.com/PlatformStackPulse/terraform-atom-molecule-module-template/actions/workflows/ci.yml/badge.svg)](../../actions/workflows/ci.yml)
-[![Release](https://github.com/PlatformStackPulse/terraform-atom-molecule-module-template/actions/workflows/auto-release.yml/badge.svg)](../../actions/workflows/auto-release.yml)
-[![CodeQL](https://github.com/PlatformStackPulse/terraform-atom-molecule-module-template/actions/workflows/codeql.yml/badge.svg)](../../actions/workflows/codeql.yml)
-[![Changelog](https://github.com/PlatformStackPulse/terraform-atom-molecule-module-template/actions/workflows/changelog.yml/badge.svg)](../../actions/workflows/changelog.yml)
-![Latest Release](https://img.shields.io/github/v/release/PlatformStackPulse/terraform-atom-molecule-module-template?label=latest%20release&sort=semver)
-![Terraform](https://img.shields.io/badge/terraform-%3E%3D1.6.0-blue?logo=terraform)
-![License](https://img.shields.io/github/license/PlatformStackPulse/terraform-atom-molecule-module-template)
+<!-- Badges -->
+[![CI](https://github.com/PlatformStackPulse/tf-atom-ssm-parameter-aws/actions/workflows/ci.yml/badge.svg)](../../actions/workflows/ci.yml)
+[![Release](https://github.com/PlatformStackPulse/tf-atom-ssm-parameter-aws/actions/workflows/auto-release.yml/badge.svg)](../../actions/workflows/auto-release.yml)
+[![CodeQL](https://github.com/PlatformStackPulse/tf-atom-ssm-parameter-aws/actions/workflows/codeql.yml/badge.svg)](../../actions/workflows/codeql.yml)
+[![Changelog](https://github.com/PlatformStackPulse/tf-atom-ssm-parameter-aws/actions/workflows/changelog.yml/badge.svg)](../../actions/workflows/changelog.yml)
+![Latest Release](https://img.shields.io/github/v/release/PlatformStackPulse/tf-atom-ssm-parameter-aws?label=latest%20release&sort=semver)
+![Terraform](https://img.shields.io/badge/terraform-%3E%3D1.11.3-blue?logo=terraform)
+![License](https://img.shields.io/github/license/PlatformStackPulse/tf-atom-ssm-parameter-aws)
 
-A production-ready template for creating Terraform modules following the **one module per repository** best practice, with built-in CI/CD, security scanning, testing, documentation generation, and publishing to public registries.
+A single-purpose Terraform **atom** module for AWS SSM Parameter Store, following the PlatformStackPulse **one module per repository** convention. Resource names and tags are derived from the [tf-label](https://github.com/PlatformStackPulse/tf-label) context so IDs stay consistent across the whole stack, and an `enabled` toggle lets composition layers switch the atom on or off without removing the module block.
 
 ## Features
 
-- **One Module Per Repo** — Module lives at the root; no nested `modules/` directory
-- **Registry Publishing** — Auto-publish to Terraform Registry, Artifactory, or GitLab on release
-- **Native Terraform Testing** — `terraform test` with mock providers (no external tools)
-- **Security Scanning** — Trivy IaC scanning for HIGH/CRITICAL vulnerabilities
-- **Linting** — TFLint with AWS ruleset (preset "all")
-- **Auto Documentation** — terraform-docs generates README sections on every commit
-- **GitHub Actions CI/CD** — Workflows for the full module lifecycle
-- **Auto Release** — CI passes on main → auto-tag → GitHub Release created
-- **Pre-Commit Hooks** — Format, validate, lint, docs, and security on every commit
-- **Conventional Commits** — Enforced commit message format
-- **Semantic Versioning** — Automated version management and releases
-- **DevContainer** — VS Code remote development ready
+- **tf-label naming** — Resource names and tags come from the shared `tf-label` context (`namespace`/`stage`/`name` → deterministic `id`)
+- **Enable/disable toggle** — `enabled = false` short-circuits the module so it creates no resources (safe conditional composition)
+- **Atom design** — One module per repo, module at the root; no nested `modules/` directory
+- **Native Terraform testing** — Real `terraform test` unit tests with a mock AWS provider (no cloud calls, no external tools)
+- **Security scanning** — Trivy IaC scanning for HIGH/CRITICAL findings
+- **Linting** — TFLint with the AWS ruleset (preset "all")
+- **Auto documentation** — terraform-docs keeps the inputs/outputs table below in sync
+- **GitHub Actions CI/CD** — Format, validate, lint, test, security on every push; auto semver release on `main`
+- **Pre-commit hooks** — Format, validate, lint, docs, and security on every commit
+- **Conventional commits + semantic versioning** — Enforced commit format drives automated releases
 
 ## CI Pipeline
 
@@ -77,38 +75,32 @@ See [TEMPLATE_GUIDE.md](TEMPLATE_GUIDE.md) for detailed instructions.
 
 ## Usage
 
-### From GitHub
-
 ```hcl
-module "this" {
-  source = "github.com/PlatformStackPulse/terraform-aws-my-module?ref=v1.0.0"
+module "ssm_parameter" {
+  source = "git::https://github.com/PlatformStackPulse/tf-atom-ssm-parameter-aws.git?ref=v1.0.0"
 
-  name        = "my-resource"
-  environment = "dev"
-  namespace   = "myorg"
+  # tf-label context — drive naming and tags
+  namespace = "eg"
+  stage     = "prod"
+  name      = "api-key"
 
   tags = {
-    Project = "example"
+    Project = "platform"
     Owner   = "platform-engineering"
   }
 }
 ```
 
-### From Terraform Registry
+To conditionally disable the module (e.g. from a composition layer) set `enabled = false`; the module then creates no resources:
 
 ```hcl
-module "this" {
-  source  = "PlatformStackPulse/my-module/aws"
-  version = "~> 1.0"
+module "ssm_parameter" {
+  source = "git::https://github.com/PlatformStackPulse/tf-atom-ssm-parameter-aws.git?ref=v1.0.0"
 
-  name        = "my-resource"
-  environment = "dev"
-  namespace   = "myorg"
-
-  tags = {
-    Project = "example"
-    Owner   = "platform-engineering"
-  }
+  enabled   = false
+  namespace = "eg"
+  stage     = "prod"
+  name      = "api-key"
 }
 ```
 
@@ -312,6 +304,33 @@ No resources.
 |------|-------------|
 | <a name="output_enabled"></a> [enabled](#output\_enabled) | Whether the module is enabled. |
 <!-- END_TF_DOCS -->
+
+## Tests
+
+Unit tests use the native `terraform test` framework with a **mock AWS provider**, so
+they run entirely offline (no credentials, no cloud calls, no cost). They assert on
+plan-known values only — the `enabled` output and the `tf-label` generated `id`
+(`eg-test-thing`) — since computed AWS attributes are unknown under a mock provider.
+
+```bash
+terraform init -backend=false
+terraform test -test-directory=tests/unit        # unit tests (mock provider, offline)
+# or
+make test-unit
+```
+
+Integration tests in `tests/integration/` run against a **real AWS account** and create
+real resources; run them only with valid credentials:
+
+```bash
+terraform test -test-directory=tests/integration
+# or
+make test-integration
+```
+
+> Note: use `-test-directory=tests/unit`, **not** `-filter=tests/unit/`. The `-filter`
+> flag expects specific `.tftest.hcl` file paths and silently matches nothing for a
+> directory, so it runs zero tests.
 
 ## Learning Materials
 

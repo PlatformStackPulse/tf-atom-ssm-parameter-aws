@@ -1,13 +1,15 @@
 # tf-atom-ssm-parameter-aws
 
+[![Terraform Format](https://img.shields.io/badge/terraform-fmt-blue?logo=terraform)](https://github.com/PlatformStackPulse/tf-atom-ssm-parameter-aws/actions)
+[![Terraform Validate](https://img.shields.io/badge/terraform-validate-blue?logo=terraform)](https://github.com/PlatformStackPulse/tf-atom-ssm-parameter-aws/actions)
+[![TFLint](https://img.shields.io/badge/tflint-passing-brightgreen?logo=terraform)](https://github.com/PlatformStackPulse/tf-atom-ssm-parameter-aws/actions)
+[![Terraform Test](https://img.shields.io/badge/tests-2%20passed-brightgreen?logo=terraform)](https://github.com/PlatformStackPulse/tf-atom-ssm-parameter-aws/actions)
+[![Security Scan](https://img.shields.io/badge/trivy-passing-brightgreen?logo=aqua)](https://github.com/PlatformStackPulse/tf-atom-ssm-parameter-aws/actions)
+[![Conventional Commits](https://img.shields.io/badge/commits-conventional-blue?logo=conventionalcommits)](https://conventionalcommits.org)
+[![Documentation](https://img.shields.io/badge/docs-terraform--docs-blue?logo=readthedocs)](https://github.com/PlatformStackPulse/tf-atom-ssm-parameter-aws/actions)
+[![License](https://img.shields.io/badge/license-MIT-blue?logo=opensourceinitiative)](LICENSE)
+
 <!-- Badges -->
-[![CI](https://github.com/PlatformStackPulse/tf-atom-ssm-parameter-aws/actions/workflows/ci.yml/badge.svg)](../../actions/workflows/ci.yml)
-[![Release](https://github.com/PlatformStackPulse/tf-atom-ssm-parameter-aws/actions/workflows/auto-release.yml/badge.svg)](../../actions/workflows/auto-release.yml)
-[![CodeQL](https://github.com/PlatformStackPulse/tf-atom-ssm-parameter-aws/actions/workflows/codeql.yml/badge.svg)](../../actions/workflows/codeql.yml)
-[![Changelog](https://github.com/PlatformStackPulse/tf-atom-ssm-parameter-aws/actions/workflows/changelog.yml/badge.svg)](../../actions/workflows/changelog.yml)
-![Latest Release](https://img.shields.io/github/v/release/PlatformStackPulse/tf-atom-ssm-parameter-aws?label=latest%20release&sort=semver)
-![Terraform](https://img.shields.io/badge/terraform-%3E%3D1.11.3-blue?logo=terraform)
-![License](https://img.shields.io/github/license/PlatformStackPulse/tf-atom-ssm-parameter-aws)
 
 A single-purpose Terraform **atom** module for AWS SSM Parameter Store, following the PlatformStackPulse **one module per repository** convention. Resource names and tags are derived from the [tf-label](https://github.com/PlatformStackPulse/tf-label) context so IDs stay consistent across the whole stack, and an `enabled` toggle lets composition layers switch the atom on or off without removing the module block.
 

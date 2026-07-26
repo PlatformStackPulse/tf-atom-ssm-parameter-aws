@@ -16,6 +16,7 @@ variables {
   namespace = "eg"
   stage     = "test"
   name      = "thing"
+  value     = "example-value"
 }
 
 # ---------------------------------------------------------------------------
@@ -33,6 +34,21 @@ run "creates_when_enabled" {
     condition     = module.this.id == "eg-test-thing"
     error_message = "tf-label id should be 'eg-test-thing' for namespace=eg, stage=test, name=thing."
   }
+
+  assert {
+    condition     = length(aws_ssm_parameter.this) == 1
+    error_message = "Exactly one aws_ssm_parameter should be planned when enabled."
+  }
+
+  assert {
+    condition     = aws_ssm_parameter.this[0].name == "eg-test-thing"
+    error_message = "Parameter name should default to the tf-label id."
+  }
+
+  assert {
+    condition     = aws_ssm_parameter.this[0].type == "String"
+    error_message = "Parameter type should default to String."
+  }
 }
 
 # ---------------------------------------------------------------------------
@@ -48,5 +64,15 @@ run "disabled_creates_nothing" {
   assert {
     condition     = output.enabled == false
     error_message = "Module should report enabled = false when enabled = false is passed."
+  }
+
+  assert {
+    condition     = length(aws_ssm_parameter.this) == 0
+    error_message = "No aws_ssm_parameter should be planned when disabled."
+  }
+
+  assert {
+    condition     = output.id == null && output.arn == null
+    error_message = "id and arn outputs should be null when the module is disabled."
   }
 }
